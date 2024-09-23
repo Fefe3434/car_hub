@@ -1,0 +1,16 @@
+{
+    "workbench.colorCustomizations": {
+      "activityBar.background": "#79bbcc",
+      "titleBar.activeBackground": "#5ac4df",
+      "titleBar.activeForeground": "#FCFCD4"
+    },
+    "python.analysis.extraPaths": [
+      "./app",
+      "./app/api_gateway/imports",
+      "./app/api_gateway/routes"
+    ],
+    "python.testing.pytestArgs": ["tests"],
+    "python.testing.unittestEnabled": false,
+    "python.testing.pytestEnabled": true
+  }
+  
