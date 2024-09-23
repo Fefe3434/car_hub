@@ -12,18 +12,18 @@ class UserInfo:
         self.session = session
 
     @property
-    def isadmin(self):
+    def is_admin(self):
         user = self._decode_token(request.authorization.token)
-        user_info = self.session.query(User).filter(User.user_id == user).first()
-        if user_info and user_info.isadmin:
-            print(user_info.isadmin)
+        user_info = self.session.query(User).filter(User.email == user).first()
+        if user_info and user_info.is_admin:
+            print(user_info.is_admin)
             return True
         return False
 
     @property
     def get_user(self):
         user = self._decode_token(request.authorization.token)
-        user_info = self.session.query(User).filter(User.user_id == user).first()
+        user_info = self.session.query(User).filter(User.email == user).first()
         return user_info
 
     def _decode_token(self, auth_token):
