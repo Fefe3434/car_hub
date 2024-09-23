@@ -10,8 +10,8 @@ logging.basicConfig(level=logging.DEBUG)
 class Token:
     def __init__(self) -> None:
         self.KEY = SECRET_KEY
-        self.TOKEN_TIME_OUT = 60 * 3  # 3 minutes (corrected to 3 minutes)
-        self.TOKEN_ALMOST_EXPIRED = 60 * 2  # 2 minutes
+        self.TOKEN_TIME_OUT = 60000 * 3  # 3 minutes (corrected to 3 minutes)
+        self.TOKEN_ALMOST_EXPIRED = 60000 * 2  # 2 minutes
         self.user = ''
         self.time_expire = datetime.datetime.utcnow()
         self.time_almost_expire = datetime.datetime.utcnow()
