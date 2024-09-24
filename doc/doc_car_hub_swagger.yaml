@@ -1,0 +1,320 @@
+openapi: 3.0.0
+info:
+  title: Car Hub API
+  description: API documentation for Car Hub, an AutoScout-like car marketplace.
+  version: 1.0.0
+  contact:
+    name: Ferdaouss
+servers:
+  - url: http://localhost:5000
+    description: Local development server
+tags:
+  - name: Users
+    description: User-related operations
+  - name: Authentication
+    description: Authentication endpoints
+  - name: Cars
+    description: Car-related operations
+  - name: Configuration
+    description: Filter configuration (brands, models, fuel types, etc.)
+  - name: Favorites
+    description: User's favorite cars
+
+paths:
+  /login:
+    post:
+      tags:
+        - Authentication
+      summary: Login user
+      requestBody:
+        description: Login credentials
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - email
+                - password
+              properties:
+                email:
+                  type: string
+                password:
+                  type: string
+      responses:
+        200:
+          description: Successful login
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  token:
+                    type: string
+        401:
+          description: Invalid credentials
+
+  /register:
+    post:
+      tags:
+        - Users
+      summary: Register a new user
+      requestBody:
+        description: Registration details
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - name
+                - email
+                - password
+                - seller_type
+              properties:
+                name:
+                  type: string
+                email:
+                  type: string
+                password:
+                  type: string
+                seller_type:
+                  type: string
+                  enum:
+                    - particulier
+                    - professionnel
+      responses:
+        201:
+          description: User created successfully
+        400:
+          description: Invalid input
+
+  /users/{user_id}:
+    get:
+      tags:
+        - Users
+      summary: Get user details
+      parameters:
+        - name: user_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        200:
+          description: User details
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  user_id:
+                    type: integer
+                  name:
+                    type: string
+                  email:
+                    type: string
+                  seller_type:
+                    type: string
+        404:
+          description: User not found
+
+  /cars:
+    get:
+      tags:
+        - Cars
+      summary: Get a list of cars
+      parameters:
+        - name: brand_id
+          in: query
+          schema:
+            type: integer
+        - name: model_id
+          in: query
+          schema:
+            type: integer
+        - name: price_min
+          in: query
+          schema:
+            type: integer
+        - name: price_max
+          in: query
+          schema:
+            type: integer
+        - name: mileage_max
+          in: query
+          schema:
+            type: integer
+        - name: fuel_type_id
+          in: query
+          schema:
+            type: integer
+      responses:
+        200:
+          description: List of cars
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    car_id:
+                      type: integer
+                    brand:
+                      type: string
+                    model:
+                      type: string
+                    price:
+                      type: number
+                      format: float
+                    mileage:
+                      type: integer
+                    fuel_type:
+                      type: string
+                    transmission:
+                      type: string
+
+  /cars/{car_id}:
+    get:
+      tags:
+        - Cars
+      summary: Get car details
+      parameters:
+        - name: car_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        200:
+          description: Car details
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  car_id:
+                    type: integer
+                  brand:
+                    type: string
+                  model:
+                    type: string
+                  price:
+                    type: number
+                    format: float
+                  mileage:
+                    type: integer
+                  fuel_type:
+                    type: string
+                  transmission:
+                    type: string
+                  power:
+                    type: string
+                  description:
+                    type: string
+                  image_url:
+                    type: string
+        404:
+          description: Car not found
+
+/favorites:
+  get:
+    tags:
+      - Favorites
+    summary: Get user's favorite cars
+    responses:
+      200:
+        description: List of favorite cars
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                type: object
+                properties:
+                  car_id:
+                    type: integer
+                  brand:
+                    type: string
+                  model:
+                    type: string
+                  price:
+                    type: number
+                    format: float
+  post:
+    tags:
+      - Favorites
+    summary: Add a car to favorites
+    requestBody:
+      description: Car ID to be added to favorites
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              car_id:
+                type: integer
+    responses:
+      201:
+        description: Car added to favorites
+
+
+  /favorites/{favorite_id}:
+    delete:
+      tags:
+        - Favorites
+      summary: Remove a car from favorites
+      parameters:
+        - name: favorite_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        204:
+          description: Car removed from favorites
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    User:
+      type: object
+      properties:
+        user_id:
+          type: integer
+        name:
+          type: string
+        email:
+          type: string
+        seller_type:
+          type: string
+    Car:
+      type: object
+      properties:
+        car_id:
+          type: integer
+        brand:
+          type: string
+        model:
+          type: string
+        price:
+          type: number
+          format: float
+        mileage:
+          type: integer
+        fuel_type:
+          type: string
+        transmission:
+          type: string
+        power:
+          type: string
+        description:
+          type: string
+        image_url:
+          type: string
