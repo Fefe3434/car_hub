@@ -10,6 +10,7 @@ from config import Config
 from app.features.login.login import Login
 from app.features.login.register import Register
 from app.features.users.users import Users
+from app.features.cars.cars_listing import CarsListing
 
 def get_api_name():
     global api
@@ -70,7 +71,8 @@ def decode_body():
 
 api_routes.add_resource(Login, '/login')
 api_routes.add_resource(Register,"/register")
-api_routes.add_resource(Users,"/users")
+api_routes.add_resource(Users,"/utilisateurs")
+api_routes.add_resource(CarsListing,"/liste_voitures")
 
 
 if __name__ == '__main__':
