@@ -66,7 +66,6 @@ class Car(Base):
     user_id = Column(Integer, ForeignKey('users.user_id'), nullable=False)
     brand_id = Column(Integer, ForeignKey('brands.brand_id'), nullable=False)
     engine_type = Column(String(255))
-    year = Column(Integer, nullable=False)
     price = Column(DECIMAL(10, 2), nullable=False)
     mileage = Column(Integer, nullable=False)
     transmission = Column(Enum(TransmissionEnum), nullable=False)
