@@ -65,7 +65,7 @@ class Car(Base):
     car_id = Column(Integer, primary_key=True, autoincrement=True)
     user_id = Column(Integer, ForeignKey('users.user_id'), nullable=False)
     brand_id = Column(Integer, ForeignKey('brands.brand_id'), nullable=False)
-    model_id = Column(Integer, ForeignKey('models.model_id'), nullable=False)  # Add model_id
+    model_id = Column(Integer, ForeignKey('models.model_id'), nullable=False)  
     engine_type = Column(String(255))
     price = Column(DECIMAL(10, 2), nullable=False)
     mileage = Column(Integer, nullable=False)
@@ -85,7 +85,7 @@ class Car(Base):
     # Relationships
     user = relationship("User")
     brand = relationship("Brand")
-    model = relationship("Model")  # Add relationship to Model
+    model = relationship("Model") 
     fuel_type = relationship("FuelType")
     emission_class = relationship("EmissionClass")
 
