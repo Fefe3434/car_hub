@@ -65,8 +65,8 @@ class Car(Base):
     car_id = Column(Integer, primary_key=True, autoincrement=True)
     user_id = Column(Integer, ForeignKey('users.user_id'), nullable=False)
     brand_id = Column(Integer, ForeignKey('brands.brand_id'), nullable=False)
+    model_id = Column(Integer, ForeignKey('models.model_id'), nullable=False)  
     engine_type = Column(String(255))
-    year = Column(Integer, nullable=False)
     price = Column(DECIMAL(10, 2), nullable=False)
     mileage = Column(Integer, nullable=False)
     transmission = Column(Enum(TransmissionEnum), nullable=False)
@@ -85,9 +85,11 @@ class Car(Base):
     # Relationships
     user = relationship("User")
     brand = relationship("Brand")
+    model = relationship("Model") 
     fuel_type = relationship("FuelType")
     emission_class = relationship("EmissionClass")
 
+    
 # Model: BrandModelMap (Mapping between brands and models)
 class BrandModelMap(Base):
     __tablename__ = 'brand_model_map'
