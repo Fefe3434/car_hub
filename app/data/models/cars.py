@@ -25,9 +25,9 @@ class CarsResponseModel(AbstractResponseComposeStrategy):
             'power': response_body.power,
             'latitude': str(response_body.latitude),
             'longitude': str(response_body.longitude),
-            'emission_class': response_body.emission_class.emission_class_name if response_body.emission_class else None,  # Handle nullable emission class
+            'emission_class': response_body.emission_class.emission_class_name if response_body.emission_class else None, 
             'announcement_title': response_body.announcement_title,
-            'first_immatriculation': response_body.first_immatriculation.strftime('%Y-%m-%d')  # Format date if you need it
+            'first_immatriculation': response_body.first_immatriculation.strftime('%Y-%m-%d')  
         }
 
 
