@@ -71,8 +71,8 @@ def decode_body():
 
 api_routes.add_resource(Login, '/login')
 api_routes.add_resource(Register,"/register")
-api_routes.add_resource(Users,"/utilisateurs")
-api_routes.add_resource(CarsListing,"/liste_voitures")
+api_routes.add_resource(Users,"/users")
+api_routes.add_resource(CarsListing,"/cars")
 
 
 if __name__ == '__main__':

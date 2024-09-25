@@ -51,4 +51,3 @@ class CarsModel:
         self.announcement_title = None
         self.first_immatriculation = None 
 
-
