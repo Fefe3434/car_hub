@@ -11,6 +11,8 @@ from app.features.login.login import Login
 from app.features.login.register import Register
 from app.features.users.users import Users
 from app.features.cars.cars_listing import CarsListing
+from app.features.brands.brands import Brands
+from app.features.brands.models import Models
 
 def get_api_name():
     global api
@@ -73,6 +75,9 @@ api_routes.add_resource(Login, '/login')
 api_routes.add_resource(Register,"/register")
 api_routes.add_resource(Users,"/users")
 api_routes.add_resource(CarsListing,"/cars")
+api_routes.add_resource(Brands,"/brands")
+api_routes.add_resource(Models,"/models")
+
 
 
 if __name__ == '__main__':
