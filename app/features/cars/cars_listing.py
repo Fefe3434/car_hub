@@ -2,7 +2,7 @@ from functools import wraps
 from http import HTTPStatus
 from flask import request
 from flask_restful import Resource
-from app.data.model_db.db_cars_hub import Car
+from app.data.model_db.db_cars_hub import Car, CarFeatureMap
 from app.utils.database.db_connexion import DbConnexion as DBConnection
 from dotenv import load_dotenv
 
@@ -75,11 +75,9 @@ class CarsListing(Resource):
         return filters
 
     def _request(self):
-        # If an ID is provided, look for a single car by ID
         if self.id:
             return self.session.query(Car).filter(Car.car_id == self.id).first()
 
-        # Otherwise, apply filters using the CarsFilter class
         filter_service = CarsFilter(self.session, self.query_params)
         return filter_service.apply_filters()
             
@@ -108,10 +106,18 @@ class CarsListing(Resource):
             validated_data = self.validate_fields(self.data, self.REQUIRED_FIELDS)
             car = Car(**validated_data)
             self.session.add(car)
-            self.session.flush()
+            self.session.flush()  
             car_id = car.car_id
+            
+            if 'features' in self.data:
+                feature_ids = self.data['features']
+                for feature_id in feature_ids:
+                    car_feature_map = CarFeatureMap(car_id=car_id, feature_id=feature_id)
+                    self.session.add(car_feature_map)
+
             self.session.commit()
-            return {'Success': 'Car created', 'id': car_id}, HTTPStatus.CREATED
+            
+            return {'Success': 'Car created', 'id': car_id}, HTTPStatus.CREATED        
         except Exception as e:
             print(e)
             return {'Error': 'Data error'}, HTTPStatus.INTERNAL_SERVER_ERROR

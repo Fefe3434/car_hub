@@ -1,5 +1,5 @@
 from sqlalchemy import and_
-from app.data.model_db.db_cars_hub import Car
+from app.data.model_db.db_cars_hub import Car, CarFeatureMap
 
 class CarsFilter:
     def __init__(self, session, query_params):
@@ -33,6 +33,11 @@ class CarsFilter:
 
         if 'emission_class_id' in self.query_params:
             filters.append(Car.emission_class_id == self.query_params['emission_class_id'])
+
+        if 'features' in self.query_params:
+            feature_ids = self.query_params['features'].split(',')
+            query = query.join(CarFeatureMap).filter(CarFeatureMap.feature_id.in_(feature_ids))
+
 
         if not filters:
             return query.all()

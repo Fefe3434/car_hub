@@ -4,8 +4,7 @@ from flask import request
 from flask_restful import Resource
 
 from app.utils.database.db_connexion import DbConnexion as DBConnection
-from app.data.models.brands import BrandsModel, BrandsResponseModel
-from app.data.model_db.db_cars_hub import Brand, EmissionClass
+from app.data.model_db.db_cars_hub import EmissionClass
 from app.data.models.emission_class import EmissionClasseModel, EmissionClasseResponseModel
 
 
