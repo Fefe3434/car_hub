@@ -7,6 +7,7 @@ from app.utils.database.db_connexion import DbConnexion as DBConnection
 from dotenv import load_dotenv
 
 from app.data.models.cars import CarsModel, CarsResponseModel
+from app.features.cars.cars_filters import CarsFilter
 
 load_dotenv()
 
@@ -21,6 +22,7 @@ class CarsListing(Resource):
         self.db_connection = DBConnection(service='CarsListing')
         self.session = self.db_connection.get_session(service='CarsListing')
         self.id = request.args.get('id')
+        self.query_params = request.args
         self.data = request.data
 
     def check_args(func):
@@ -73,11 +75,13 @@ class CarsListing(Resource):
         return filters
 
     def _request(self):
-            filters = self._filters()
-            if filters:
-                return self.session.query(Car).filter(*filters).first()
-            else:
-                return self.session.query(Car).all()
+        # If an ID is provided, look for a single car by ID
+        if self.id:
+            return self.session.query(Car).filter(Car.car_id == self.id).first()
+
+        # Otherwise, apply filters using the CarsFilter class
+        filter_service = CarsFilter(self.session, self.query_params)
+        return filter_service.apply_filters()
             
     def get(self):
         try:
