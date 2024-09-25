@@ -13,6 +13,8 @@ from app.features.users.users import Users
 from app.features.cars.cars_listing import CarsListing
 from app.features.brands.brands import Brands
 from app.features.brands.models import Models
+from app.features.fuel.fuel_type import FuelTypes
+from app.features.emission.emission_classe import EmissionClasses
 
 def get_api_name():
     global api
@@ -77,6 +79,10 @@ api_routes.add_resource(Users,"/users")
 api_routes.add_resource(CarsListing,"/cars")
 api_routes.add_resource(Brands,"/brands")
 api_routes.add_resource(Models,"/models")
+api_routes.add_resource(FuelTypes,"/fuel_types")
+api_routes.add_resource(EmissionClasses,"/emission_classes")
+
+
 
 
 
