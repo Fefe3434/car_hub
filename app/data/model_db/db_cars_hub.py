@@ -151,6 +151,10 @@ class Message(Base):
     car_id = Column(Integer, ForeignKey('cars.car_id'))
     created_at = Column(TIMESTAMP, server_default=func.now(), nullable=True)
 
+    sender = relationship('User', foreign_keys=[sender_id])
+    receiver = relationship('User', foreign_keys=[receiver_id])
+    car = relationship('Car', foreign_keys=[car_id])
+
 # Model: Review (User reviews of cars)
 class Review(Base):
     __tablename__ = 'reviews'
