@@ -156,11 +156,14 @@ class Review(Base):
     __tablename__ = 'reviews'
 
     review_id = Column(Integer, primary_key=True, autoincrement=True)
-    user_id = Column(Integer, ForeignKey('users.user_id'), nullable=False)
-    car_id = Column(Integer, ForeignKey('cars.car_id'), nullable=False)
-    rating = Column(DECIMAL(2, 1), nullable=True)
+    reviewer_id = Column(Integer, ForeignKey('users.user_id'), nullable=False)  
+    reviewed_user_id = Column(Integer, ForeignKey('users.user_id'), nullable=False)  
+    rating = Column(DECIMAL(2, 1), nullable=True)  
     review_text = Column(Text)
-    created_at = Column(TIMESTAMP, server_default=func.now(),nullable=True)
+    created_at = Column(TIMESTAMP, server_default=func.now(), nullable=True)
+
+    reviewer = relationship("User", foreign_keys=[reviewer_id]) 
+    reviewed_user = relationship("User", foreign_keys=[reviewed_user_id]) 
 
     __table_args__ = (
         ForeignKeyConstraint(['rating'], ['reviews.rating'], name='reviews_chk_1', use_alter=True),
