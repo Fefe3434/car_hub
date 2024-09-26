@@ -2,17 +2,24 @@ from functools import wraps
 from http import HTTPStatus
 from flask import request
 from flask_restful import Resource
-from app.data.model_db.db_cars_hub import Car, CarFeatureMap
+from app.data.model_db.db_cars_hub import Car, CarFeatureMap, Feature
 from app.utils.database.db_connexion import DbConnexion as DBConnection
 from dotenv import load_dotenv
 
 from app.data.models.cars import CarsModel, CarsResponseModel
 from app.features.cars.cars_filters import CarsFilter
+from app.shared.user_info.user_info import UserInfo
 
 load_dotenv()
 
+ALLOWED_FILTERS = {'id', 'min_power', 'emission_class_ids', 'max_power', 'brand_id', 
+                   'model_id', 'min_price', 'max_price', 'min_mileage', 'max_mileage', 
+                   'fuel_type_id', 'transmission', 'location', 
+                   'features', 'min_year', 'max_year'}
+
+
 class CarsListing(Resource):
-    REQUIRED_FIELDS = ['user_id', 'brand_id', 'model_id', 'price', 'mileage', 'transmission',
+    REQUIRED_FIELDS = ['brand_id', 'model_id', 'price', 'mileage', 'transmission',
                        'location', 'first_immatriculation', 'fuel_type_id', 'power', 'description',
                        'engine_type', 'image_url', 'emission_class_id', 'announcement_title','latitude','longitude','first_immatriculation']
 
@@ -24,12 +31,26 @@ class CarsListing(Resource):
         self.id = request.args.get('id')
         self.query_params = request.args
         self.data = request.data
+        self.current_user = UserInfo(self.session).get_user
 
     def check_args(func):
         @wraps(func)
         def wrapper(self, *args, **kwargs):
             if not self.id:
                 return {'Error': 'Id is required.'}, HTTPStatus.BAD_REQUEST
+            return func(self, *args, **kwargs)
+        return wrapper
+    
+    def check_args_get(func):
+        @wraps(func)
+        def wrapper(self, *args, **kwargs):
+            if not request.args:
+                return func(self, *args, **kwargs)
+
+            invalid_filters = [arg for arg in request.args if arg not in ALLOWED_FILTERS]
+            if invalid_filters:
+                return {'Error': f"Invalid filter(s) provided: {', '.join(invalid_filters)}"}, HTTPStatus.BAD_REQUEST
+
             return func(self, *args, **kwargs)
         return wrapper
     
@@ -62,11 +83,10 @@ class CarsListing(Resource):
         @wraps(func)
         def wrapper(self, *args, **kwargs):
             if isinstance(self.data, dict):
-                if not any(field in self.data for field in self.REQUIRED_FIELDS):
+                if not any(field in self.data for field in self.REQUIRED_FIELDS) and 'features' not in self.data:
                     return {'Error': 'At least one field must be provided for patch'}, HTTPStatus.BAD_REQUEST
             return func(self, *args, **kwargs)
         return wrapper
-
 
     def _filters(self):
         filters = []
@@ -77,10 +97,15 @@ class CarsListing(Resource):
     def _request(self):
         if self.id:
             return self.session.query(Car).filter(Car.car_id == self.id).first()
+        
+        # if not self.query_params:
+        #     return self.session.query(Car).all()
 
         filter_service = CarsFilter(self.session, self.query_params)
         return filter_service.apply_filters()
             
+
+    @check_args_get        
     def get(self):
         try:
             strategy = CarsResponseModel(CarsModel())
@@ -90,23 +115,42 @@ class CarsListing(Resource):
                 return {'Error': 'Car not found'}, HTTPStatus.NOT_FOUND
 
             if isinstance(cars, Car):
-                car_data = strategy.compose(cars)
+                features = self._get_features(cars.car_id)
+                car_data = strategy.compose(cars, features)  
                 return car_data, HTTPStatus.OK
 
-            car_list = [strategy.compose(car) for car in cars]
+            car_list = []
+            for car in cars:
+                features = self._get_features(car.car_id)
+                car_list.append(strategy.compose(car, features))  
             return car_list, HTTPStatus.OK
 
         except Exception as e:
             return {'Error': str(e)}, HTTPStatus.INTERNAL_SERVER_ERROR
+    
+    def _get_features(self, car_id):
+        features_query = (
+            self.session.query(Feature.feature_name)
+            .join(CarFeatureMap, Feature.feature_id == CarFeatureMap.feature_id)
+            .filter(CarFeatureMap.car_id == car_id)
+        )
+        return [feature.feature_name for feature in features_query]
 
     @validate_data
     @validate_required_fields
     def post(self):
         try:
-            validated_data = self.validate_fields(self.data, self.REQUIRED_FIELDS)
+            if not self.current_user or not self.current_user.user_id:
+                return {'Error': 'User not authenticated or invalid token'}, HTTPStatus.UNAUTHORIZED
+            
+            self.data['user_id'] = self.current_user.user_id
+            
+            validated_data = self.validate_fields(self.data, self.REQUIRED_FIELDS + ['user_id'])
+
             car = Car(**validated_data)
             self.session.add(car)
-            self.session.flush()  
+            self.session.flush()
+
             car_id = car.car_id
             
             if 'features' in self.data:
@@ -131,16 +175,27 @@ class CarsListing(Resource):
             car = self._request()
             if not car:
                 return {'Error': 'Car not found'}, HTTPStatus.NOT_FOUND
-            return self._decompose_patch(car)
+
+            for key, value in self.data.items():
+                if key != 'features': 
+                    setattr(car, key, value)
+
+            if 'features' in self.data:
+                self._update_car_features(car.car_id, self.data['features'])
+
+            self.session.commit()
+            return {'Success': "Car updated", 'id': self.id}, HTTPStatus.OK
         except Exception as e:
             return {'Error': str(e)}, HTTPStatus.INTERNAL_SERVER_ERROR
 
-    def _decompose_patch(self, car):
-        for key, value in self.data.items():
-            if key != 'id':
-                setattr(car, key, value)
-        self.session.commit()
-        return {'Success': "car updated", 'id': self.id}, HTTPStatus.OK
+    def _update_car_features(self, car_id, new_features):
+        self.session.query(CarFeatureMap).filter(CarFeatureMap.car_id == car_id).delete()
+
+        for feature_id in new_features:
+            car_feature_map = CarFeatureMap(car_id=car_id, feature_id=feature_id)
+            self.session.add(car_feature_map)
+
+        self.session.flush()
 
     @check_args
     @validate_data

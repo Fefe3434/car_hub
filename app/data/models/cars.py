@@ -9,7 +9,7 @@ class CarsResponseModel(AbstractResponseComposeStrategy):
     def __init__(self, model):
         super().__init__(model)
 
-    def compose(self, response_body: Car):
+    def compose(self, response_body: Car, features: List[str] = []):
         return {
             'car_id': response_body.car_id,
             'brand': response_body.brand.brand_name,  
@@ -23,10 +23,12 @@ class CarsResponseModel(AbstractResponseComposeStrategy):
             'location': response_body.location,
             'image_url': response_body.image_url,
             'power': response_body.power,
+            # 'power': f"{response_body.power} hp",
             'latitude': str(response_body.latitude),
             'longitude': str(response_body.longitude),
             'emission_class': response_body.emission_class.emission_class_name if response_body.emission_class else None, 
             'announcement_title': response_body.announcement_title,
+            'features': features if features else [], 
             'first_immatriculation': response_body.first_immatriculation.strftime('%Y-%m-%d')  
         }
 

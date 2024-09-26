@@ -74,7 +74,7 @@ class Car(Base):
     location = Column(String(255), nullable=False)
     image_url = Column(String(255))
     created_at = Column(TIMESTAMP, server_default=func.now(), nullable=True)
-    power = Column(String(255), nullable=False)
+    power = Column(Integer, nullable=False)    
     first_immatriculation = Column(Date, nullable=False)
     fuel_type_id = Column(Integer, ForeignKey('fuel_types.fuel_type_id'), nullable=False)
     latitude = Column(DECIMAL(10, 8))
