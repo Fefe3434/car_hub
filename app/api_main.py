@@ -18,6 +18,7 @@ from app.features.emission.emission_classe import EmissionClasses
 from app.features.features.features_categories import FeaturesCategories
 from app.features.features.features import Features
 from app.shared.enum.enum import EnumResource
+from app.features.favorites.favorites import Favorites
 
 def get_api_name():
     global api
@@ -87,6 +88,7 @@ api_routes.add_resource(EmissionClasses,"/emission_classes")
 api_routes.add_resource(FeaturesCategories,"/features_categories")
 api_routes.add_resource(Features,"/features")
 api_routes.add_resource(EnumResource, '/enums/<string:enum_name>')
+api_routes.add_resource(Favorites, '/favorites')
 
 
 
