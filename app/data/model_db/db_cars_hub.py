@@ -88,6 +88,7 @@ class Car(Base):
     model = relationship("Model") 
     fuel_type = relationship("FuelType")
     emission_class = relationship("EmissionClass")
+    favorites = relationship("Favorite", back_populates="car")
 
     
 # Model: BrandModelMap (Mapping between brands and models)
@@ -135,7 +136,9 @@ class Favorite(Base):
     favorite_id = Column(Integer, primary_key=True, autoincrement=True)
     user_id = Column(Integer, ForeignKey('users.user_id'), nullable=False)
     car_id = Column(Integer, ForeignKey('cars.car_id'), nullable=False)
-    created_at = Column(TIMESTAMP, nullable=True)
+    created_at = Column(TIMESTAMP, server_default=func.now(), nullable=True)
+
+    car = relationship("Car", back_populates="favorites")
 
 # Model: Message (Messages between users about cars)
 class Message(Base):
@@ -146,7 +149,7 @@ class Message(Base):
     receiver_id = Column(Integer, ForeignKey('users.user_id'), nullable=False)
     message_body = Column(Text, nullable=False)
     car_id = Column(Integer, ForeignKey('cars.car_id'))
-    created_at = Column(TIMESTAMP, nullable=True)
+    created_at = Column(TIMESTAMP, server_default=func.now(), nullable=True)
 
 # Model: Review (User reviews of cars)
 class Review(Base):
@@ -157,7 +160,7 @@ class Review(Base):
     car_id = Column(Integer, ForeignKey('cars.car_id'), nullable=False)
     rating = Column(DECIMAL(2, 1), nullable=True)
     review_text = Column(Text)
-    created_at = Column(TIMESTAMP, nullable=True)
+    created_at = Column(TIMESTAMP, server_default=func.now(),nullable=True)
 
     __table_args__ = (
         ForeignKeyConstraint(['rating'], ['reviews.rating'], name='reviews_chk_1', use_alter=True),
@@ -172,4 +175,4 @@ class Transaction(Base):
     seller_id = Column(Integer, ForeignKey('users.user_id'), nullable=False)
     car_id = Column(Integer, ForeignKey('cars.car_id'), nullable=False)
     sale_price = Column(DECIMAL(10, 2), nullable=False)
-    transaction_date = Column(TIMESTAMP, nullable=True)
+    transaction_date = Column(TIMESTAMP, server_default=func.now(), nullable=True)
