@@ -19,8 +19,8 @@ class SellerTypeEnum(enum.Enum):
 
 # Role Enum
 class RoleEnum(enum.Enum):
-    buyer = 'buyer'
-    seller = 'seller'
+    acheteur = 'vendeur'
+    vendeur = 'acheteur'
     admin = 'admin'
 
 # Model: Brand
@@ -53,7 +53,7 @@ class User(Base):
     email = Column(String(255), nullable=False, unique=True)
     password = Column(String(255), nullable=False)
     phone_number = Column(String(20))
-    role = Column(Enum(RoleEnum), default=RoleEnum.buyer)
+    role = Column(Enum(RoleEnum), default=RoleEnum.acheteur)
     created_at = Column(TIMESTAMP, server_default=func.now())
     seller_type = Column(Enum(SellerTypeEnum), default=SellerTypeEnum.particulier)
     is_admin = Column(Boolean,  nullable=False,  default=0)
@@ -150,6 +150,10 @@ class Message(Base):
     message_body = Column(Text, nullable=False)
     car_id = Column(Integer, ForeignKey('cars.car_id'))
     created_at = Column(TIMESTAMP, server_default=func.now(), nullable=True)
+
+    sender = relationship('User', foreign_keys=[sender_id])
+    receiver = relationship('User', foreign_keys=[receiver_id])
+    car = relationship('Car', foreign_keys=[car_id])
 
 # Model: Review (User reviews of cars)
 class Review(Base):
