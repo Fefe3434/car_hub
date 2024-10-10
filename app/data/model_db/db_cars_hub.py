@@ -19,8 +19,8 @@ class SellerTypeEnum(enum.Enum):
 
 # Role Enum
 class RoleEnum(enum.Enum):
-    buyer = 'buyer'
-    seller = 'seller'
+    acheteur = 'vendeur'
+    vendeur = 'acheteur'
     admin = 'admin'
 
 # Model: Brand
@@ -53,7 +53,7 @@ class User(Base):
     email = Column(String(255), nullable=False, unique=True)
     password = Column(String(255), nullable=False)
     phone_number = Column(String(20))
-    role = Column(Enum(RoleEnum), default=RoleEnum.buyer)
+    role = Column(Enum(RoleEnum), default=RoleEnum.acheteur)
     created_at = Column(TIMESTAMP, server_default=func.now())
     seller_type = Column(Enum(SellerTypeEnum), default=SellerTypeEnum.particulier)
     is_admin = Column(Boolean,  nullable=False,  default=0)
