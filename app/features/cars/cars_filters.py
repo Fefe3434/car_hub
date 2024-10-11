@@ -19,14 +19,20 @@ class CarsFilter:
         if 'model_id' in self.query_params:
             filters.append(Car.model_id == self.query_params['model_id'])
 
-        if 'min_price' in self.query_params and 'max_price' in self.query_params:
-            filters.append(Car.price.between(self.query_params['min_price'], self.query_params['max_price']))
+        if 'min_price' in self.query_params:
+            filters.append(Car.price >= float(self.query_params['min_price']))
+        if 'max_price' in self.query_params:
+            filters.append(Car.price <= float(self.query_params['max_price']))
 
-        if 'min_mileage' in self.query_params and 'max_mileage' in self.query_params:
-            filters.append(Car.mileage.between(self.query_params['min_mileage'], self.query_params['max_mileage']))
+        if 'min_mileage' in self.query_params:
+            filters.append(Car.mileage >= int(self.query_params['min_mileage']))
+        if 'max_mileage' in self.query_params:
+            filters.append(Car.mileage <= int(self.query_params['max_mileage']))
 
         if 'fuel_type_id' in self.query_params:
-            filters.append(Car.fuel_type_id == self.query_params['fuel_type_id'])
+            fuel_type_id = int(self.query_params['fuel_type_id'])
+            print(f"Applying fuel type filter: {fuel_type_id}")
+            filters.append(Car.fuel_type_id == fuel_type_id)
 
         if 'emission_class_ids' in self.query_params:
             emission_class_ids = self.query_params['emission_class_ids'].split(',')
@@ -46,9 +52,10 @@ class CarsFilter:
             filters.append(Car.power <= int(self.query_params['max_power']))
 
 
-        if 'features' in self.query_params:
+        if 'features' in self.query_params and self.query_params['features']:
             feature_ids = self.query_params['features'].split(',')
             query = query.join(CarFeatureMap).filter(CarFeatureMap.feature_id.in_(feature_ids))
+
 
         if 'min_year' in self.query_params or 'max_year' in self.query_params:
             min_year = self.query_params.get('min_year', '1900')  
@@ -60,7 +67,8 @@ class CarsFilter:
                 )
             except ValueError:
                 return {'Error': 'Invalid year format for min_year or max_year'}, HTTPStatus.BAD_REQUEST
-
+        
+        print("Query Params:", self.query_params)
         if not filters:
             return query.all()
 

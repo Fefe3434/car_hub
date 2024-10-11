@@ -11,9 +11,13 @@ def create_token(user_id='Seven'):
 
 
 def requires_auth():
-    if request.path in routes_without_token:
+    if request.method == 'GET' and request.path in routes_without_token:
         return
+    
     token = get_auth_header_token()
+    if not token:
+        return {'message': 'Token required'}, 401
+    
     try:
         g.token = jwt.decode(token, SECRET_KEY, algorithms=['HS256'])
     except jwt.ExpiredSignatureError:
@@ -25,6 +29,10 @@ def requires_auth():
 def get_auth_header_token():
     auth_header = request.headers.get('Authorization')
     if not auth_header:
-        return {'message': 'Invalid Authorization header'}, 401
-    token = request.authorization.token
-    return token
+        return None
+    try: 
+        token = request.authorization.token
+        return token
+    except IndexError:
+        return None
+    
