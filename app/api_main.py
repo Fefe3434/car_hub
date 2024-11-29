@@ -21,6 +21,8 @@ from app.shared.enum.enum import EnumResource
 from app.features.favorites.favorites import Favorites
 from app.features.reviews.reviews import Reviews
 from app.features.messages.messages import Messages
+from app.features.cars_images.car_images import CarImages
+from app.features.cars_images.car_primary_image import CarPrimaryImage
 
 def get_api_name():
     global api
@@ -82,7 +84,7 @@ def decode_body():
 api_routes.add_resource(Login, '/login')
 api_routes.add_resource(Register,"/register")
 api_routes.add_resource(Users,"/users")
-api_routes.add_resource(CarsListing,"/cars")
+api_routes.add_resource(CarsListing,"/cars", "/cars/<int:id>")
 api_routes.add_resource(Brands,"/brands")
 api_routes.add_resource(Models,"/models")
 api_routes.add_resource(FuelTypes,"/fuel_types")
@@ -93,6 +95,8 @@ api_routes.add_resource(EnumResource, '/enums/<string:enum_name>')
 api_routes.add_resource(Favorites, '/favorites')
 api_routes.add_resource(Reviews, '/reviews')
 api_routes.add_resource(Messages, '/messages')
+api_routes.add_resource(CarImages, "/cars/images/<int:car_id>")  
+api_routes.add_resource(CarPrimaryImage, "/cars/primary_image/<int:car_id>")
 
 
 

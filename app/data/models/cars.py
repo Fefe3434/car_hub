@@ -3,6 +3,7 @@ from typing import List
 
 from app.utils.models.absract_request_strategy import AbstractResponseComposeStrategy
 from app.data.model_db.db_cars_hub import Car
+from app.data.models.car_images import CarImagesResponseModel
 
 
 class CarsResponseModel(AbstractResponseComposeStrategy):
@@ -10,6 +11,13 @@ class CarsResponseModel(AbstractResponseComposeStrategy):
         super().__init__(model)
 
     def compose(self, response_body: Car, features: List[str] = []):
+        images_response = [
+            CarImagesResponseModel(CarImagesResponseModel).compose(image)
+            for image in response_body.images
+        ]
+        primary_image_url = (
+            next((img.image_url for img in response_body.images if img.image_id == response_body.primary_image_id), None)
+        )
         return {
             'car_id': response_body.car_id,
             'brand': response_body.brand.brand_name,  
@@ -21,7 +29,8 @@ class CarsResponseModel(AbstractResponseComposeStrategy):
             'engine_type': response_body.engine_type,
             'transmission': response_body.transmission.value, 
             'location': response_body.location,
-            'image_url': response_body.image_url,
+            'primary_image_url': primary_image_url,  # New field
+            # 'images': images_response,  # List of all images
             'power': response_body.power,
             # 'power': f"{response_body.power} hp",
             'latitude': str(response_body.latitude),
