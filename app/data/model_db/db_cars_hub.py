@@ -58,23 +58,21 @@ class User(Base):
     seller_type = Column(Enum(SellerTypeEnum), default=SellerTypeEnum.particulier)
     is_admin = Column(Boolean,  nullable=False,  default=0)
     
-# Model: Car
 class Car(Base):
     __tablename__ = 'cars'
 
     car_id = Column(Integer, primary_key=True, autoincrement=True)
     user_id = Column(Integer, ForeignKey('users.user_id'), nullable=False)
     brand_id = Column(Integer, ForeignKey('brands.brand_id'), nullable=False)
-    model_id = Column(Integer, ForeignKey('models.model_id'), nullable=False)  
+    model_id = Column(Integer, ForeignKey('models.model_id'), nullable=False)
     engine_type = Column(String(255))
     price = Column(DECIMAL(10, 2), nullable=False)
     mileage = Column(Integer, nullable=False)
     transmission = Column(Enum(TransmissionEnum), nullable=False)
     description = Column(Text)
     location = Column(String(255), nullable=False)
-    image_url = Column(String(255))
-    created_at = Column(TIMESTAMP, server_default=func.now(), nullable=True)
-    power = Column(Integer, nullable=False)    
+    primary_image_id = Column(Integer, ForeignKey('car_images.image_id'), nullable=True)  # Link to the primary image    created_at = Column(TIMESTAMP, server_default=func.now(), nullable=True)
+    power = Column(Integer, nullable=False)
     first_immatriculation = Column(Date, nullable=False)
     fuel_type_id = Column(Integer, ForeignKey('fuel_types.fuel_type_id'), nullable=False)
     latitude = Column(DECIMAL(10, 8))
@@ -85,12 +83,38 @@ class Car(Base):
     # Relationships
     user = relationship("User")
     brand = relationship("Brand")
-    model = relationship("Model") 
+    model = relationship("Model")
     fuel_type = relationship("FuelType")
     emission_class = relationship("EmissionClass")
     favorites = relationship("Favorite", back_populates="car")
-
+    images = relationship("CarImage", back_populates="car", cascade="all, delete-orphan")  # Link to all images
+    images = relationship(
+        "CarImage",
+        back_populates="car",
+        foreign_keys="[CarImage.car_id]"
+    )
+    primary_image = relationship(
+        "CarImage",
+        foreign_keys="[Car.primary_image_id]",
+        uselist=False
+    )
     
+class CarImage(Base):
+    __tablename__ = 'car_images'
+
+    image_id = Column(Integer, primary_key=True, autoincrement=True)
+    car_id = Column(Integer, ForeignKey('cars.car_id'), nullable=False)
+    image_url = Column(String(255), nullable=False)
+
+    # Relationships
+    car = relationship(
+        "Car",
+        back_populates="images",
+        foreign_keys=[car_id]
+    )
+
+
+
 # Model: BrandModelMap (Mapping between brands and models)
 class BrandModelMap(Base):
     __tablename__ = 'brand_model_map'

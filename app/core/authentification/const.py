@@ -8,4 +8,7 @@ routes_without_token = [
     '/emission_classes',
     '/features_categories',
     '/features',
-    '/cars']
+    '/cars',
+    '/cars/images',
+    '/cars/primary_image',
+]

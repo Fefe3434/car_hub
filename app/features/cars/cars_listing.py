@@ -2,7 +2,7 @@ from functools import wraps
 from http import HTTPStatus
 from flask import request
 from flask_restful import Resource
-from app.data.model_db.db_cars_hub import Car, CarFeatureMap, Feature
+from app.data.model_db.db_cars_hub import Car, CarFeatureMap, CarImage, Feature
 from app.utils.database.db_connexion import DbConnexion as DBConnection
 from dotenv import load_dotenv
 
@@ -106,23 +106,35 @@ class CarsListing(Resource):
             
 
     @check_args_get        
-    def get(self):
+    def get(self, id=None):
+        """
+        Fetch a specific car if 'id' is provided; otherwise, fetch all cars.
+        """
         try:
+            # If 'id' is provided by the route, assign it to self.id
+            if id is not None:
+                self.id = id
+
             strategy = CarsResponseModel(CarsModel())
             cars = self._request()
 
             if cars is None:
                 return {'Error': 'Car not found'}, HTTPStatus.NOT_FOUND
 
-            if isinstance(cars, Car):
+            if isinstance(cars, Car):  # Single car
                 features = self._get_features(cars.car_id)
-                car_data = strategy.compose(cars, features)  
+                car_data = strategy.compose(cars, features)
+                car_data["primary_image_url"] = self._get_primary_image(cars.car_id)  
                 return car_data, HTTPStatus.OK
 
+            # Multiple cars
             car_list = []
             for car in cars:
                 features = self._get_features(car.car_id)
-                car_list.append(strategy.compose(car, features))  
+                car_data = strategy.compose(car, features)
+                car_data["primary_image_url"] = self._get_primary_image(car.car_id)  
+                car_list.append(car_data)
+            
             return car_list, HTTPStatus.OK
 
         except Exception as e:
@@ -135,6 +147,18 @@ class CarsListing(Resource):
             .filter(CarFeatureMap.car_id == car_id)
         )
         return [feature.feature_name for feature in features_query]
+    
+    def _get_primary_image(self, car_id):
+        """
+        Fetch the primary image URL for a car.
+        """
+        primary_image = (
+            self.session.query(CarImage)
+            .filter(CarImage.car_id == car_id, CarImage.image_id == Car.primary_image_id)
+            .first()
+        )
+        return primary_image.image_url if primary_image else None
+
 
     @validate_data
     @validate_required_fields
