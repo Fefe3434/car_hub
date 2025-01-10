@@ -1,4 +1,4 @@
-from flask import Flask, request
+from flask import Flask, make_response, request
 from flask_restful import Api
 from flask_cors import CORS
 import json
@@ -34,9 +34,18 @@ api = get_api_name()
 api.config.from_object(Config)
 api.config['CORS_HEADERS'] = 'Content-Type'
 # Configure CORS
-CORS(api, resources={r"/*": {"origins": "*",
-                             "methods": ["GET", "POST", "PATCH", "DELETE", "PUT"],
-                             "allow_headers": ["Content-Type",]}})
+# CORS(api, resources={r"/*": {"origins": "*",
+#                              "methods": ["GET", "POST", "PATCH", "DELETE", "PUT", "OPTIONS"],
+#                              "allow_headers": ["Content-Type",]}})
+
+CORS(api, resources={
+    r"/*": {
+        "origins": "*",
+        "methods": ["GET", "POST", "PATCH", "DELETE", "PUT", "OPTIONS"],
+        "allow_headers": ["Content-Type", "Authorization", "X-Requested-With"],
+        "expose_headers": ["Authorization"],
+    }
+})
 
 api_routes = Api(api)
 
@@ -60,6 +69,15 @@ def replace_none_to_null_value(response):
         response.data = data
         return response
     except Exception:
+        return response
+
+@api.before_request
+def handle_preflight():
+    if request.method == 'OPTIONS':
+        response = make_response()
+        response.headers['Access-Control-Allow-Origin'] = '*'
+        response.headers['Access-Control-Allow-Methods'] = 'GET, POST, PATCH, DELETE, PUT, OPTIONS'
+        response.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization'
         return response
 
 
